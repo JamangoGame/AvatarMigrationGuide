@@ -12,8 +12,8 @@ The `BowBrawl/` folder contains a fully migrated game with example gameplay code
 
 | Removed | Replacement | Section |
 |---|---|---|
-| `J.setCharacterItem(id, item)` | `J.addCharacterMeshAttachmentProp(...)` + tracked handle | [§1 Item equip] |
-| `J.setCharacterItem(id, undefined)` | `J.removeCharacterMeshAttachment(id, handle)` | [§1 Item equip] |
+| `J.setCharacterItem(id, item)` | 3rd-person `J.addCharacterMeshAttachmentProp(...)` **+** 1st-person `J.addFirstPersonMeshAttachmentProp(...)`; track both handles † | [§1 Item equip] |
+| `J.setCharacterItem(id, undefined)` | `J.removeCharacterMeshAttachment(id, handle)` **+** `J.removeFirstPersonMeshAttachment(id, fpHandle)` | [§1 Item equip] |
 | `J.getCharacterItem(id)` | Track equipped state yourself, or `J.getCharacterMeshAttachments(id)` | [§1 Item equip] |
 | `J.ItemAnimations.ONE_HANDED_TOOL` | string `"items_tools_idle_over"` (table in [§1 Item equip]) | [§1 Item equip] |
 | `J.characterPlayEmote(id, emoteId)` | `J.characterPlayAnimation(id, clipName, opts?)` | [§2 Emotes API] |
@@ -24,6 +24,8 @@ The `BowBrawl/` folder contains a fully migrated game with example gameplay code
 | `J.assets.avatarComponents` | Removed, use avatar config APIs with known component IDs | [§4 Avatar API] |
 | `schema.asset({ assetTypes: ["emote"] })` | `assetTypes: ["animation"]` | [§6 Schema asset types] |
 | `schema.asset({ assetTypes: ["avatarComponent"] })` | Removed, no replacement | [§6 Schema asset types] |
+
+**Held items are now client-only and split in two.** The old `setCharacterItem` was a single engine-managed call that showed the prop in both first- and third-person. The replacement is **two** attachments you place and tune yourself — `J.addCharacterMeshAttachmentProp` (3rd-person, what others see) and `J.addFirstPersonMeshAttachmentProp` (1st-person, your own view) — and **neither is networked**. For remote players to see held items, replicate the equipped state via a trait ([§5 Multiplayer replication]).
 
 ---
 
