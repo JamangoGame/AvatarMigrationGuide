@@ -1,5 +1,12 @@
 # Jamango World Migration Guide (June 2026)
 
+## What this guide is for
+
+Jamango's avatar rebuild introduced new lower-level APIs for GLB items, props, transforms, animations, emotes, and avatar configuration. Use this guide if your world was built against the old Items, emote, or avatar component APIs and needs to be updated to the new system.
+
+## Example migrated game
+
+The `BowBrawl/` folder contains a fully migrated game with example gameplay code. Use it as a solid base when you want to see these migration patterns in a complete, working project.
 
 ## TL;DR, what got removed and what to call instead
 
