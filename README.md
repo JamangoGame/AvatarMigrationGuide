@@ -12,18 +12,18 @@ The `BowBrawl/` folder contains a fully migrated game with example gameplay code
 
 | Removed | Replacement | Section |
 |---|---|---|
-| `J.setCharacterItem(id, item)` | `J.addCharacterMeshAttachmentProp(...)` + tracked handle | §1 |
-| `J.setCharacterItem(id, undefined)` | `J.removeCharacterMeshAttachment(id, handle)` | §1 |
-| `J.getCharacterItem(id)` | Track equipped state yourself, or `J.getCharacterMeshAttachments(id)` | §1 |
-| `J.ItemAnimations.ONE_HANDED_TOOL` | string `"items_tools_idle_over"` (table in §1) | §1 |
-| `J.characterPlayEmote(id, emoteId)` | `J.characterPlayAnimation(id, clipName, opts?)` | §2 |
-| `J.characterStopEmote(id, emoteId)` | `J.characterStopAnimation(id, clipName, opts?)` | §2 |
-| `J.assets.emotes.Wave` (and ALL old names) | `J.assets.animations.emotes_hello` etc., see §3 | §3 |
-| `J.equipAvatarComponent(id, componentId)` | `J.addCharacterAvatarConfig(id, partialConfig)` | §4 |
-| `J.unequipAvatarComponent(id, componentId)` | Reset + re-layer pattern | §4 |
-| `J.assets.avatarComponents` | Removed, use avatar config APIs with known component IDs | §4 |
-| `schema.asset({ assetTypes: ["emote"] })` | `assetTypes: ["animation"]` | §6 |
-| `schema.asset({ assetTypes: ["avatarComponent"] })` | Removed, no replacement | §6 |
+| `J.setCharacterItem(id, item)` | `J.addCharacterMeshAttachmentProp(...)` + tracked handle | [§1 Item equip] |
+| `J.setCharacterItem(id, undefined)` | `J.removeCharacterMeshAttachment(id, handle)` | [§1 Item equip] |
+| `J.getCharacterItem(id)` | Track equipped state yourself, or `J.getCharacterMeshAttachments(id)` | [§1 Item equip] |
+| `J.ItemAnimations.ONE_HANDED_TOOL` | string `"items_tools_idle_over"` (table in [§1 Item equip]) | [§1 Item equip] |
+| `J.characterPlayEmote(id, emoteId)` | `J.characterPlayAnimation(id, clipName, opts?)` | [§2 Emotes API] |
+| `J.characterStopEmote(id, emoteId)` | `J.characterStopAnimation(id, clipName, opts?)` | [§2 Emotes API] |
+| `J.assets.emotes.Wave` (and ALL old names) | `J.assets.animations.emotes_hello` etc., see [§3 Available emotes] | [§3 Available emotes] |
+| `J.equipAvatarComponent(id, componentId)` | `J.addCharacterAvatarConfig(id, partialConfig)` | [§4 Avatar API] |
+| `J.unequipAvatarComponent(id, componentId)` | Reset + re-layer pattern | [§4 Avatar API] |
+| `J.assets.avatarComponents` | Removed, use avatar config APIs with known component IDs | [§4 Avatar API] |
+| `schema.asset({ assetTypes: ["emote"] })` | `assetTypes: ["animation"]` | [§6 Schema asset types] |
+| `schema.asset({ assetTypes: ["avatarComponent"] })` | Removed, no replacement | [§6 Schema asset types] |
 
 ---
 
@@ -33,19 +33,29 @@ The `BowBrawl/` folder contains a fully migrated game with example gameplay code
 
 | If you find this in your code... | Go to | What it means |
 |---|---|---|
-| `setCharacterItem` | §1 | Old item-equip API, removed. |
-| `getCharacterItem` | §1 | Old item-equip API, removed. |
-| `ItemAnimations` | §1 | Old item-animation enum, removed. |
-| `characterPlayEmote` | §2 | Old emote API, removed. |
-| `characterStopEmote` | §2 | Old emote API, removed. |
-| `assets.emotes` | §2 + §3 | Old emote asset registry, removed. |
-| `equipAvatarComponent` | §4 | Old avatar API, removed. |
-| `unequipAvatarComponent` | §4 | Old avatar API, removed. |
-| `assets.avatarComponents` | §4 | Old avatar asset registry, removed. |
-| `"emote"` (inside `assetTypes`) | §6 | Old schema asset type, renamed. |
-| `"avatarComponent"` (inside `assetTypes`) | §6 | Old schema asset type, removed. |
+| `setCharacterItem` | [§1 Item equip] | Old item-equip API, removed. |
+| `getCharacterItem` | [§1 Item equip] | Old item-equip API, removed. |
+| `ItemAnimations` | [§1 Item equip] | Old item-animation enum, removed. |
+| `characterPlayEmote` | [§2 Emotes API] | Old emote API, removed. |
+| `characterStopEmote` | [§2 Emotes API] | Old emote API, removed. |
+| `assets.emotes` | [§2 Emotes API], [§3 Available emotes] | Old emote asset registry, removed. |
+| `equipAvatarComponent` | [§4 Avatar API] | Old avatar API, removed. |
+| `unequipAvatarComponent` | [§4 Avatar API] | Old avatar API, removed. |
+| `assets.avatarComponents` | [§4 Avatar API] | Old avatar asset registry, removed. |
+| `"emote"` (inside `assetTypes`) | [§6 Schema asset types] | Old schema asset type, renamed. |
+| `"avatarComponent"` (inside `assetTypes`) | [§6 Schema asset types] | Old schema asset type, removed. |
+
+[§1 Item equip]: #section-1
+[§2 Emotes API]: #section-2
+[§3 Available emotes]: #section-3
+[§4 Avatar API]: #section-4
+[§5 Multiplayer replication]: #section-5
+[§5.1 Client animations]: #section-5-1
+[§6 Schema asset types]: #section-6
 
 ---
+
+<a id="section-1"></a>
 
 ## §1 Item equip, REQUIRED if you ever put a prop in a player's hand
 
@@ -104,7 +114,7 @@ type CharacterSlotId =
 
 ### Three rules
 
-1. **Client-only, not networked.** Calling `addCharacterMeshAttachmentProp` on the server is a silent no-op. Calling it on one client does NOT show the item to other clients. To make remote players see held items, see §5.
+1. **Client-only, not networked.** Calling `addCharacterMeshAttachmentProp` on the server is a silent no-op. Calling it on one client does NOT show the item to other clients. To make remote players see held items, see [§5 Multiplayer replication].
 2. **No "current item" concept.** The engine doesn't track what you attached as "the held item", you must store the returned `handle` so you can remove it later.
 3. **Always check the handle.** `-1` means the attach failed. Don't store it; bail out of your equip path.
 
@@ -268,11 +278,13 @@ J.onPlayerLeave((playerId) => {
 
 ---
 
+<a id="section-2"></a>
+
 ## §2 Emotes API, REQUIRED if you ever played an emote
 
 **What broke:** `J.characterPlayEmote` and `J.characterStopEmote` are removed. `J.assets.emotes.*` is gone with NO aliases, the old emote names (`Wave`, `CowgirlDance`, `MangoDance`, `Salute`, `FistPump`, `ThumbsUp`, `RaisedArms`, `Talk`, `Think`, `Beckon`, `Measure`, `Show`, `Freeze`, `JumpingJacks`, `LayDown`, `PushUps`, `Sit`, `Stretch`, `Dance`, `DjDance`, `HopakDance`, `Flying`, `Energy`, `Death`, `Fly`, `Zombie`, `Clap`) are all gone.
 
-**Replacement:** `J.assets.animations.*` + `J.characterPlayAnimation(id, clip, opts?)`. Pick the closest clip from §3.
+**Replacement:** `J.assets.animations.*` + `J.characterPlayAnimation(id, clip, opts?)`. Pick the closest clip from [§3 Available emotes].
 
 ### Signatures (repeat from §1)
 
@@ -328,7 +340,7 @@ J.onGameTick(() => {
 });
 ```
 
-No extra trait is needed because the engine already replicates `getCharacterAlive`. Every client watches the alive state and triggers the hold locally. This is the same shape as §5's pattern (client side reaction to networked state), but for animation instead of equipment. See §5.1 for the general rule.
+No extra trait is needed because the engine already replicates `getCharacterAlive`. Every client watches the alive state and triggers the hold locally. This is the same shape as the [§5 Multiplayer replication] pattern (client side reaction to networked state), but for animation instead of equipment. See [§5.1 Client animations] for the general rule.
 
 ### Before / after
 
@@ -355,6 +367,8 @@ J.clearCharacterAnimations(playerId);
 You can pass `J.assets.animations.<name>.id` OR a raw string literal, both work.
 
 ---
+
+<a id="section-3"></a>
 
 ## §3 Available emotes, enumerated
 
@@ -436,6 +450,8 @@ J.characterPlayAnimation(playerId, "locomotion_default_leanLeft_add"); // additi
 The full set in `locomotion_default_*`: `idle`, `walk`, `run`, `sprint`, `fall`, `fallFree`, `flyIdle`, `fly`, `flySprint`, `flyUp`, `flyDown`, `crouch`, `crouchIdle`, `death`, `jumpStart`, `jumpEnd`, `jumpDouble`, `swimIdle`, `swimCrawl`, `swimBreaststroke`, `hit_add`, `impulseStart_add`, `impulseStop_add`, `leanLeft_add`, `leanRight_add`.
 
 ---
+
+<a id="section-4"></a>
 
 ## §4 Avatar API, CONDITIONAL: only if you swap avatar components
 
@@ -531,6 +547,8 @@ Pass component IDs as string literals (e.g. `"nova_chest"`). The asset registry 
 
 ---
 
+<a id="section-5"></a>
+
 ## §5 Multiplayer replication of held items, RECOMMENDED
 
 **Why this is in the guide:** `addCharacterMeshAttachmentProp` is client-only and not networked. If your world is multiplayer and you equip props, other players will NOT see what each player is holding unless you replicate the state yourself.
@@ -539,11 +557,13 @@ The recommended pattern uses a trait, traits auto-sync server → all clients (b
 
 **Use a trait, not a one-shot command broadcast.** It's tempting to replicate equips by sending a "player X equipped Y" message to everyone when it happens. That breaks for **late joiners**: a player who connects *after* the equip never received that message, so they see everyone empty-handed until each player happens to equip again. A trait holds *current* state, and the engine syncs current trait values to any client when it joins, so late joiners just read the trait and attach the right mesh, no resync code needed. (If you already have an equip command from the client, keep it for client → server, but have the server write the result to a trait rather than re-broadcasting it.)
 
+<a id="section-5-1"></a>
+
 ### §5.1 Always play animations on the client
 
 `characterPlayAnimation` and `characterStopAnimation` calls on the server replace whatever the client is playing. A server side death pose erases the held item pose the client was layering on top, and the character snaps back to default arms.
 
-Keep every animation call in `client.ts` or in a module imported by it. When an animation should react to networked state (death, hit, equipment change), have the client observe the state and trigger the animation locally. The death example in §2 follows this pattern, watching `getCharacterAlive`. The trait based equipment pattern below (§5 Step 1 to 3) is the same idea for held items.
+Keep every animation call in `client.ts` or in a module imported by it. When an animation should react to networked state (death, hit, equipment change), have the client observe the state and trigger the animation locally. The death example in [§2 Emotes API] follows this pattern, watching `getCharacterAlive`. The trait based equipment pattern below ([§5 Multiplayer replication], Step 1 to 3) is the same idea for held items.
 
 ### Step 1: Define the trait
 
@@ -615,6 +635,8 @@ export function update() {
 Why the local-vs-remote split: the trait round-trips through the server (~1 tick latency). For the local player you have the data instantly via your own state, use it. For everyone else, the trait is the only synced source.
  
 
+<a id="section-6"></a>
+
 ## §6 Schema asset types
 
 If you defined a trait with `J.schema.asset({ assetTypes: [...] })`:
@@ -635,14 +657,14 @@ J.schema.asset({ assetTypes: ["avatarComponent"] })
 
 ## §7 Migration checklist
 
-- [ ] If `setCharacterItem` / `getCharacterItem` / `ItemAnimations` had hits: migrate §1. Rewrite your equip function, drop dead imports, remove any server-side equip calls.
+- [ ] If `setCharacterItem` / `getCharacterItem` / `ItemAnimations` had hits: migrate [§1 Item equip]. Rewrite your equip function, drop dead imports, remove any server-side equip calls.
 - [ ] Update scaling/transform of your props in first person / third person
-- [ ] If `characterPlayEmote` / `characterStopEmote` / `assets.emotes` had hits: migrate §2. Replace each call site with `characterPlayAnimation` in `client.ts` (not `server.ts`, see §5.1); pick the new clip name from §3.
-- [ ] If you use raw old emote names (Wave, CowgirlDance, …) in strings/configs anywhere: replace them using §3's table, there are no automatic aliases.
-- [ ] If `equipAvatarComponent` / `unequipAvatarComponent` / `assets.avatarComponents` had hits: migrate §4. Switch to additive layering with reset + re-layer for unequip.
-- [ ] If your world is multiplayer and equips items: add §5's trait-based replication.
-- [ ] If your `J.schema.asset(...)` calls used `"emote"` or `"avatarComponent"`: update per §6.
-- [ ] If an animation should play once and freeze on the final frame (death, knockout), pass `mode: "hold"` to `characterPlayAnimation`. See §2.
+- [ ] If `characterPlayEmote` / `characterStopEmote` / `assets.emotes` had hits: migrate [§2 Emotes API]. Replace each call site with `characterPlayAnimation` in `client.ts` (not `server.ts`, see [§5.1 Client animations]); pick the new clip name from [§3 Available emotes].
+- [ ] If you use raw old emote names (Wave, CowgirlDance, …) in strings/configs anywhere: replace them using [§3 Available emotes], there are no automatic aliases.
+- [ ] If `equipAvatarComponent` / `unequipAvatarComponent` / `assets.avatarComponents` had hits: migrate [§4 Avatar API]. Switch to additive layering with reset + re-layer for unequip.
+- [ ] If your world is multiplayer and equips items: add [§5 Multiplayer replication].
+- [ ] If your `J.schema.asset(...)` calls used `"emote"` or `"avatarComponent"`: update per [§6 Schema asset types].
+- [ ] If an animation should play once and freeze on the final frame (death, knockout), pass `mode: "hold"` to `characterPlayAnimation`. See [§2 Emotes API].
 
 ---
 
@@ -652,11 +674,11 @@ J.schema.asset({ assetTypes: ["avatarComponent"] })
 - **The returned handle can be `-1`.** Always check before storing.
 - **Mesh attachments don't auto-clean on swap.** Track the handle; `removeCharacterMeshAttachment` before adding a new one.
 - **First-person attachments are safe to add for any character.** They render only when the local camera is currently first-person on that character.
-- **Avatar resets wipe everything else, too.** When you do reset + re-layer (§4), be sure your `equipped` set has everything the player should keep.
-- **Trait `setTrait` is not idempotent for network traffic.** Diff before setting (see §5's server loop).
-- **Old emote names are GONE with no aliases.** Pick the closest from §3 or remove the feature. The old `Wave` is now `emotes_hello`; `CowgirlDance` / `Dance` / `DjDance` collapse to `emotes_danceBasic` or `emotes_danceWorm`; `Sit` becomes `actions_sit`; the rest have no direct mapping.
-- **Never call `characterPlayAnimation` or `characterStopAnimation` on the server.** Server animation calls replace client animations, so a server side death pose erases the held item pose layered on top. See §5.1.
-- **Held items do not sync by themselves.** Mesh attachments are local to the client that created them. To make other players see what someone is holding, publish the current item key on a trait and apply it on every client. See §5.
+- **Avatar resets wipe everything else, too.** When you do reset + re-layer ([§4 Avatar API]), be sure your `equipped` set has everything the player should keep.
+- **Trait `setTrait` is not idempotent for network traffic.** Diff before setting (see the [§5 Multiplayer replication] server loop).
+- **Old emote names are GONE with no aliases.** Pick the closest from [§3 Available emotes] or remove the feature. The old `Wave` is now `emotes_hello`; `CowgirlDance` / `Dance` / `DjDance` collapse to `emotes_danceBasic` or `emotes_danceWorm`; `Sit` becomes `actions_sit`; the rest have no direct mapping.
+- **Never call `characterPlayAnimation` or `characterStopAnimation` on the server.** Server animation calls replace client animations, so a server side death pose erases the held item pose layered on top. See [§5.1 Client animations].
+- **Held items do not sync by themselves.** Mesh attachments are local to the client that created them. To make other players see what someone is holding, publish the current item key on a trait and apply it on every client. See [§5 Multiplayer replication].
 
 ---
 
