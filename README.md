@@ -1,4 +1,4 @@
-# Jamango World Migration Guide (June 2026)
+# Jamango Avatar Migration Guide + Animation Reference (June 2026)
 
 ## What this guide is for
 
@@ -841,4 +841,3 @@ The suffix determines blending mode automatically:
 | `locomotion_default_impulseStop_add` | additive | Impulse kick stop |
 
 ---
- :
