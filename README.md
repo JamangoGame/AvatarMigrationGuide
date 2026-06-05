@@ -372,7 +372,7 @@ You can pass `J.assets.animations.<name>.id` OR a raw string literal, both work.
 
 ## §3 Available emotes, enumerated
 
-Use any of these as the `clip` argument to `characterPlayAnimation`. Source: engine's `lib/content-client/.../character-component.ts:2905-2996`.
+Use any of these as the `clip` argument to `characterPlayAnimation`.  
 
 ### Recommended emotes (dances & gestures)
 
